@@ -19,15 +19,15 @@ environment{
 
     stages {
 
-        stage('Build') {
+        // stage('Build') {
 
-            steps {
+        //     steps {
 
-                sh "mvn clean deploy"
+        //         sh "mvn clean deploy"
 
-            }
+        //     }
 
-        }
+        // }
         // stage('SonarQube analysis') {
         //     environment {
         //         scannerHome = tool 'sonarscanner'
@@ -114,3 +114,4 @@ environment{
 //     }
 
 // }
+}
