@@ -31,10 +31,9 @@ pipeline {
                     buildInfo.env.collect()
                     server.publishBuildInfo(buildInfo)
                     echo '<--------------- Jar Publish Ended --------------->'  
-                }
-            
             }
-        }  
-    } 
+            
+        }
+    }  
+} 
     
-}   
