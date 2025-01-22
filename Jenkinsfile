@@ -49,18 +49,24 @@ environment{
                         def uploadSpec = """{
                             "files": [
                                 {
-                                "pattern": "jarstaging/(*)",
-                                "target": "libs-release-local/{1}",
-                                "flat": "false",
-                                "props" : "${properties}",
-                                "exclusions": [ "*.sha1", "*.md5"]
+                                    "pattern": "jarstaging/*.jar",  // Use a more specific pattern for matching JAR files
+                                    "target": "libs-release-local/{1}",  // Target path in Artifactory
+                                    "flat": "false",  // Keep the directory structure intact
+                                    "props": "${properties}",
+                                    "exclusions": ["*.sha1", "*.md5"]  // Exclude checksum files
                                 }
                             ]
                         }"""
-                        def buildInfo = server.upload(uploadSpec)
-                        buildInfo.env.collect()
-                        // server.publishBuildInfo(buildInfo)
-                        echo '<--------------- Jar Publish Ended --------------->'  
+                    // Upload the artifacts to Artifactory
+                    def buildInfo = server.upload(uploadSpec)
+
+                    // Collect environment information and set it in build info
+                    buildInfo.env.collect()
+
+                    // Publish the build info to Artifactory
+                    server.publishBuildInfo(buildInfo)
+                    
+                    echo '<--------------- Jar Publish Ended --------------->'    
                 
                 }
             }   
