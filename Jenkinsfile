@@ -11,27 +11,30 @@ pipeline {
     }
 
     stages {
-    stage('Jar Publish') { 
-        steps {
-            script {
+        stage('Build') {
+            steps {
+                sh 'mvn clean install' 
+            }
+        }
+        stage('Jar Publish') { 
+            steps {
+                script {
                 
                     echo '<--------------- Jar Publish Started --------------->'
-                    def server = Artifactory.newServer url:registry+"/artifactory" ,  credentialsId:"JFrog_Artifactory"
-                    def properties = "buildid=${env.BUILD_ID},commitid=${GIT_COMMIT}";
-                    def uploadSpec = """{
-                          "files": [
-                            {
-                              "pattern": "jarstaging/(*)",
-                              "target": "libs-release-local/{1}",
-                              "flat": "false",
-                              "props" : "${properties}",
-                              "exclusions": [ "*.sha1", "*.md5"]
-                            }
-                         ]
-                    }"""
-                    def buildInfo = server.upload(uploadSpec)
-                    buildInfo.env.collect()
-                    server.publishBuildInfo(buildInfo)
+                    def server = Artifactory.server server: 'https://galaxyzz.jfrog.io', credentialsId: 'JFrog_Artifactory' 
+                    server.upload spec: """
+                        {
+                            "files": [
+                                {
+                                    "pattern": "target/*.jar", 
+                                    "target": "libs-release-local", 
+                                    "flat": true,
+                                    "props": "build.number=${BUILD_NUMBER}"
+                                }
+                            ]
+                        }
+                    """
+                            
                     echo '<--------------- Jar Publish Ended --------------->'
                 } 
             }
