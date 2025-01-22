@@ -21,7 +21,7 @@ environment{
 
             steps {
 
-                sh "mvn clean install"
+                sh "mvn clean deploy"
 
             }
 
