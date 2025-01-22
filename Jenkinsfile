@@ -18,44 +18,23 @@ environment{
  
 
     stages {
-
-        // stage('Build') {
-
-        //     steps {
-
-        //         sh "mvn clean deploy"
-
-        //     }
-
-        // }
-        // stage('SonarQube analysis') {
-        //     environment {
-        //         scannerHome = tool 'sonarscanner'
-
-        //     }
-        //     steps{
-        //         withSonarQubeEnv('sonarqube-server') { // If you have configured more than one global server connection, you can specify its name
-        //             sh "${scannerHome}/bin/sonar-scanner"
-        //         }
-        //     }
-        // }
         stage("Jar Publish") {
             steps {
                 script {
                     echo '<--------------- Jar Publish Started --------------->'
 
-                    // Create a connection to the Artifactory server using the URL and credentials ID
+                    // Define the server and credentials
                     def server = Artifactory.newServer url: registry + "/artifactory", credentialsId: "JFrog_Artifactory"
 
-                    // Set properties such as build ID and commit ID
+                    // Define build properties (like build ID and commit ID)
                     def properties = "buildid=${env.BUILD_ID},commitid=${GIT_COMMIT}"
 
-                    // Define the upload spec for the artifacts without comments
+                    // Define the upload specification, ensuring the pattern and target path are correct
                     def uploadSpec = """{
                         "files": [
                             {
                                 "pattern": "jarstaging/*.jar",
-                                "target": "libs-release-local/{1}",
+                                "target": "libs-release-local/${env.BUILD_ID}/",
                                 "flat": "false",
                                 "props": "${properties}",
                                 "exclusions": ["*.sha1", "*.md5"]
@@ -63,55 +42,26 @@ environment{
                         ]
                     }"""
 
-                    // Upload the artifacts to Artifactory
-                    def buildInfo = server.upload(uploadSpec)
+                    // Upload the artifact to Artifactory
+                    try {
+                        def buildInfo = server.upload(uploadSpec)
 
-                    // Collect environment information and set it in build info
-                    buildInfo.env.collect()
+                        // Collect environment info and associate it with the build
+                        buildInfo.env.collect()
 
-                    // Publish the build info to Artifactory
-                    server.publishBuildInfo(buildInfo)
+                        // Publish build info to Artifactory
+                        server.publishBuildInfo(buildInfo)
 
-                    echo '<--------------- Jar Publish Ended --------------->'  
+                        echo '<--------------- Jar Publish Ended --------------->'
+                    } catch (Exception e) {
+                        echo "Error during artifact upload: ${e.getMessage()}"
+                        throw e
+                    }
                 }
             }   
         }
     }
-
-            
-//         stage("Jar Publish") {
-//             steps {
-//                 script {
-//                         echo '<--------------- Jar Publish Started --------------->'
-//                         def server = Artifactory.newServer url:registry+"/artifactory" ,  credentialsId:"JFrog_Artifactory"
-//                         def properties = "buildid=${env.BUILD_ID},commitid=${GIT_COMMIT}";
-//                         def uploadSpec = """{
-//                             "files": [
-//                                 {
-//                                     "pattern": "jarstaging/*.jar",  // Use a more specific pattern for matching JAR files
-//                                     "target": "libs-release-local/{1}",  // Target path in Artifactory
-//                                     "flat": "false",  // Keep the directory structure intact
-//                                     "props": "${properties}",
-//                                     "exclusions": ["*.sha1", "*.md5"]  // Exclude checksum files
-//                                 }
-//                             ]
-//                         }"""
-//                     // Upload the artifacts to Artifactory
-//                     def buildInfo = server.upload(uploadSpec)
-
-//                     // Collect environment information and set it in build info
-//                     buildInfo.env.collect()
-
-//                     // Publish the build info to Artifactory
-//                     server.publishBuildInfo(buildInfo)
-                    
-//                     echo '<--------------- Jar Publish Ended --------------->'    
-                
-//                 }
-//             }   
-//         }   
-
-//     }
-
-// }
 }
+
+
+        
