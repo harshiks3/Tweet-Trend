@@ -9,12 +9,13 @@
     <packaging>jar</packaging>
 
     <dependencies>
-        <!-- Updated GitHub API dependency to valid version -->
-        <dependency>
-            <groupId>org.kohsuke.github</groupId>
-            <artifactId>github-api</artifactId>
-            <version>1.135</version> <!-- Updated version -->
-        </dependency>
+		<!-- https://mvnrepository.com/artifact/org.kohsuke/github-api -->
+		<dependency>
+			<groupId>org.kohsuke</groupId>
+			<artifactId>github-api</artifactId>
+			<version>1.326</version>
+		</dependency>
+
     </dependencies>
 
     <repositories>
