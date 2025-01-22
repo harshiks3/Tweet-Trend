@@ -43,9 +43,7 @@ pipeline {
                     server.publishBuildInfo(buildInfo)
                     echo '<--------------- Jar Publish Ended --------------->'  
                 }
-                catch (Exception e) {
-                echo "Error during artifact upload: ${e.getMessage()}"
-                throw e
+            
             }
         }   
     }
