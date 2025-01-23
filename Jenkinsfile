@@ -19,7 +19,7 @@ pipeline {
                 script {
                     def server = Artifactory.server(
                         [
-                            id: 'myArtifactoryServer', // Give it a unique ID
+                    
                             url: 'https://galaxyzz.jfrog.io',
                             credentialsId: 'JFrog_Artifactory'
                         ]
