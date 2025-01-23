@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        // Define any environment variables you need
         ARTIFACTORY_URL = "https://galaxyzz.jfrog.io/artifactory"
         ARTIFACTORY_CREDENTIALS = "JFrog_Artifactory"
     }
@@ -18,7 +17,7 @@ pipeline {
                     )
 
                     // Define build properties
-                    def properties = "buildid=${env.BUILD_ID},commitid=${GIT_COMMIT}"
+                    def properties = "buildid=54,commitid=9d01e0adc5a1f19635c71fb461896aac54e10c63"
 
                     // Define the upload spec for Artifactory
                     def uploadSpec = """
@@ -26,7 +25,7 @@ pipeline {
                         "files": [
                             {
                                 "pattern": "target/*.jar",  // Path to the files you want to upload
-                                "target": "libs-release-local/${env.BUILD_ID}/",  // Target repository in Artifactory
+                                "target": "libs-release-local/54/",  // Target repository in Artifactory
                                 "flat": "false",  // Keep the directory structure intact
                                 "props": "${properties}",  // Attach properties to the uploaded files
                                 "exclusions": ["*.sha1", "*.md5"]  // Exclude checksum files
@@ -34,7 +33,9 @@ pipeline {
                         ]
                     }
                     """
-                    // Output the upload spec to verify
+
+                    // Store the uploadSpec in a global variable to be used in the next stage
+                    currentBuild.description = uploadSpec
                     echo "Upload Spec: ${uploadSpec}"
                 }
             }
@@ -43,19 +44,26 @@ pipeline {
         stage('Upload to Artifactory') {
             steps {
                 script {
-                    // Upload the artifacts using the defined upload spec
+                    // Retrieve the uploadSpec from the previous stage (global context)
+                    def uploadSpec = currentBuild.description
+
+                    if (!uploadSpec) {
+                        error "Upload Spec not found. Cannot proceed with Artifactory upload."
+                    }
+
+                    // Initialize Artifactory server connection again for the upload step
                     def server = Artifactory.newServer(
                         url: ARTIFACTORY_URL, 
                         credentialsId: ARTIFACTORY_CREDENTIALS
                     )
 
-                    // Upload the artifact(s)
+                    // Upload the artifact(s) using the uploadSpec defined in the previous stage
                     def buildInfo = server.upload(uploadSpec)
 
-                    // Output the build info to verify
+                    // Output the build info to verify the upload was successful
                     echo "Build Info: ${buildInfo}"
 
-                    // Publish the build info to Artifactory
+                    // Publish the build info to Artifactory for tracking
                     server.publishBuildInfo(buildInfo)
                 }
             }
