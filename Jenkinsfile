@@ -27,10 +27,11 @@ pipeline {
                                 "pattern": "target/*.jar",  // Path to the files you want to upload
                                 "target": "libs-release-local/54/",  // Target repository in Artifactory
                                 "flat": "false",  // Keep the directory structure intact
-                                "props": "${properties}",  // Attach properties to the uploaded files
+                                "props": "buildid=54,commitid=9d01e0adc5a1f19635c71fb461896aac54e10c63",  // Attach properties to the uploaded files
                                 "exclusions": ["*.sha1", "*.md5"]  // Exclude checksum files
                             }
                         ]
+                    
                     }
                     """
 
