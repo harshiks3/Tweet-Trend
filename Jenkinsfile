@@ -20,8 +20,8 @@ pipeline {
                     def server = Artifactory.server(
                         [
                     
-                            server.url: 'https://galaxyzz.jfrog.io',
-                            server.credentialsId: 'JFrog_Artifactory'
+                            server.url='https://galaxyzz.jfrog.io',
+                            server.credentialsId='JFrog_Artifactory'
                         ]
                     )
 
