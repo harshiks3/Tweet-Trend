@@ -17,23 +17,27 @@ pipeline {
         stage('Publish to Artifactory') {
             steps {
                 script {
-                    def server = Artifactory.server server: 'https://galaxyzz.jfrog.io', credentialsId: 'JFrog_Artifactory'
-                    server.upload spec: """
-                        {
-                            "files": [
-                                {
-                                    "pattern": "target/*.jar", 
-                                    "target": "libs-release-local", 
-                                    "flat": true,
-                                    "props": [ 
-                                        "build.number=${BUILD_NUMBER}" 
-                                    ] 
-                                }
-                            ]
-                        }
-                    """
+                    def server = Artifactory.server(
+                        [
+                            id: 'myArtifactoryServer', // Give it a unique ID
+                            url: 'https://galaxyzz.jfrog.io',
+                            credentialsId: 'JFrog_Artifactory'
+                        ]
+                    )
+
+                    // OR, if you have a pre-configured server in Jenkins:
+                    // def server = Artifactory.server('myArtifactoryServerName')
+
+                    def rtUpload = Artifactory.newUploadSpec()
+                    rtUpload.set("files[*].{pattern: 'target/*.jar', target: 'libs-release-local/'}") // Example path
+
+                    server.upload(rtUpload)
                 }
             }
+                            
+                       
+                
+            
         }
     }
 }
