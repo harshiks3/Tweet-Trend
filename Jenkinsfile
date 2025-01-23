@@ -25,10 +25,7 @@ pipeline {
                         "files": [
                             {
                                 "pattern": "target/*.jar",
-                                "target": "libs-release-local/54/",
-                                "flat": "false",
-                                "props": "buildid=54,commitid=9d01e0adc5a1f19635c71fb461896aac54e10c63",
-                                "exclusions": ["*.sha1", "*.md5"]
+                                "target": "libs-release-local/54/"
                             }
                         ]
                     }
