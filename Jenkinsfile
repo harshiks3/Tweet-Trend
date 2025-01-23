@@ -5,7 +5,6 @@ pipeline {
         }
     }
     stages {
-        node {
             try {
                 stage('Preparation') {
                     echo "Preparing for artifact upload"
@@ -62,7 +61,7 @@ pipeline {
                 currentBuild.result = 'FAILURE'
                 echo "Error during artifact upload: ${e.getMessage()}"
                 throw e  // Rethrow the error so Jenkins will fail the build
-            }
         }
+        
     }
 }
