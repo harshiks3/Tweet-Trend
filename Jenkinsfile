@@ -1,70 +1,67 @@
-
-def registry = "https://galaxyzz.jfrog.io"
 pipeline {
     agent {
         node {
             label 'Linux_Agent'
         }
     }
-    environment {
-        PATH = "/opt/apache-maven-3.9.9/bin:$PATH"
-    }
-
     stages {
-        stage('Build') {
-            steps {
-                sh 'mvn clean install' 
-            }
-        }
-        stage('Jar Publish') { 
-            steps {
-                script {
-                    echo '<--------------- Jar Publish Started --------------->'
-
-            // Define the Artifactory server and credentials
-            def server = Artifactory.newServer(
-                url: registry + "/artifactory", 
-                credentialsId: "JFrog_Artifactory"
-            )
-
-            // Define properties for the build (build ID and commit ID)
-            def properties = "buildid=${env.BUILD_ID},commitid=${GIT_COMMIT}"
-
-            // Define the upload spec, ensuring it's correctly formatted
-            def uploadSpec = """{
-                "files": [
-                    {
-                        "pattern": "jarstaging/*.jar",  // Ensure this is the correct path
-                        "target": "libs-release-local/${env.BUILD_ID}/",  // Specify the target location in Artifactory
-                        "flat": "false",  // Preserve directory structure
-                        "props": "${properties}",
-                        "exclusions": ["*.sha1", "*.md5"]  // Exclude checksum files
-                    }
-                ]
-            }"""
-
+        node {
             try {
-                // Upload the artifact to Artifactory using the upload spec
-                def buildInfo = server.upload(uploadSpec)
-
-                // Collect environment information and associate it with the build
-                buildInfo.env.collect()
-
-                // Publish the build info to Artifactory
-                server.publishBuildInfo(buildInfo)
-
-                echo '<--------------- Jar Publish Ended --------------->'
-            } catch (Exception e) {
-                echo "Error during artifact upload: ${e.getMessage()}"
-                currentBuild.result = 'FAILURE'
-                throw e  // Re-throw the error to fail the build
-            }
-        }
-   
-                
+                stage('Preparation') {
+                    echo "Preparing for artifact upload"
                     
-                     
-                
+                    // Define the Artifactory server URL and credentials
+                    def server = Artifactory.newServer(
+                        url: "https://https://galaxyzz.jfrog.io/artifactory", 
+                        credentialsId: "JFrog_Artifactory"
+                    )
+                    
+                    // Define properties for the build (build ID, commit ID, etc.)
+                    def properties = "buildid=${env.BUILD_ID},commitid=${GIT_COMMIT}"
+                    
+                    // Define the upload specification (uploadSpec) for Artifactory
+                    def uploadSpec = """
+                    {
+                        "files": [
+                            {
+                                "pattern": "target/*.jar",  // Path to the files you want to upload
+                                "target": "libs-release-local/${env.BUILD_ID}/",  // Target repository and directory in Artifactory
+                                "flat": "false",  // Keep the directory structure intact
+                                "props": "${properties}",  // Attach properties to the uploaded files
+                                "exclusions": ["*.sha1", "*.md5"]  // Exclude checksum files
+                            }
+                        ]
+                    }
+                    """
+
+                    // Output the uploadSpec to verify
+                    echo "Upload Spec: ${uploadSpec}"
+                }
+
+                stage('Upload to Artifactory') {
+                    echo "Uploading artifacts to Artifactory"
+                    
+                    // Upload the artifact(s) to Artifactory using the specified uploadSpec
+                    def buildInfo = server.upload(uploadSpec)
+
+                    // Log the build information to verify the upload
+                    echo "Build Info: ${buildInfo}"
+
+                    // Collect environment information (e.g., build ID, Git commit ID, etc.)
+                    buildInfo.env.collect()
+
+                    // Publish the build information to Artifactory
+                    server.publishBuildInfo(buildInfo)
+                }
+
+                stage('Success') {
+                    echo "Artifact upload completed successfully"
+                }
+            } catch (Exception e) {
+                // Catch any exception and set the build to failure
+                currentBuild.result = 'FAILURE'
+                echo "Error during artifact upload: ${e.getMessage()}"
+                throw e  // Rethrow the error so Jenkins will fail the build
             }
         }
     }
