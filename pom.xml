@@ -117,19 +117,6 @@
 	</build>
 	<distributionManagement>
 		<repository>
-			<id>central</id>
-			<name>a0khz3nfmmenp-artifactory-primary-0-releases</name>
-			<url>https://galaxyzz.jfrog.io/artifactory/harshithks-123</url>
-		</repository>
-		<snapshotRepository>
-			<id>snapshots</id>
-			<name>a0khz3nfmmenp-artifactory-primary-0-snapshots</name>
-			<url>https://galaxyzz.jfrog.io/artifactory/harshithks-123</url>
-		</snapshotRepository>
-	</distributionManagement>
-	
-	<distributionManagement>
-		<repository>
 			<id>dev</id>
 			<url>file://jarstaging</url>
 		</repository>
