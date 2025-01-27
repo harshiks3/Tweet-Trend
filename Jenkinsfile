@@ -15,15 +15,24 @@ pipeline {
             }
         }
         stage('send artifact'){
-            def uploadSpec = '''{
-                "files": [
+           steps {
+                script {
+                    def server = Artifactory.server("https://galaxyzz.jfrog.io")
+                    def uploadSpec = """
                     {
-                        "pattern": "target/*.jar",
-                        "target": "libs-release-local/"
+                        "files": [
+                            {
+                                "pattern": "**/*.jar",
+                                "target": "${REPO_NAME}/"
+                            }
+                        ]
                     }
-                ]
-            }'''
-            server.upload(uploadSpec)
+                    """
+
+                    // Upload artifacts to Artifactory
+                    server.upload(spec: uploadSpec)
+                }
+            }
             
             
         }        
